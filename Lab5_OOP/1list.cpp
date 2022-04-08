@@ -14,6 +14,12 @@ public:
 		a = 0;
 		printf("x = %d,a = %.2f\n", x, a );
 	}
+	Base(int x, float a) {
+		printf("Base()\n");
+		this->x = x;
+		this->a = a;
+		printf("x = %d,a = %.2f\n", x, a);
+	}
 	Base(Base* obj) {
 		printf("Base(Base* obj)\n");
 		x = obj->x;
@@ -29,7 +35,7 @@ public:
 	virtual ~Base() {
 		printf("~Base()\n");
 		x = 0;
-		a = false;
+		a = 0;
 	}
 };
 
@@ -41,7 +47,7 @@ public:
 	Desc():Base() {
 		printf("Desc()\n");
 		y = 0;
-		b = false;
+		b = 0;
 		printf("x = %d,a = %.2f, y = %d, b = %.2f\n", x, a, y, b);
 	}
 	Desc(Desc *obj) :Base(obj) {
@@ -59,7 +65,7 @@ public:
 	~Desc(){
 		printf("~Desc()\n");
 		y = 0; 
-		b = false;
+		b = 0;
 		printf("x = %d,a = %.2f, y = %d, b = %.2f\n", x, a, y, b);
 	}
 };
@@ -67,42 +73,70 @@ public:
 void func1(Base obj) {
 	printf("func1(Base obj)\n");
 	obj.x = 4;
-	obj.a = 7.8;
+	obj.a = (float)7.8;
 }
 
 void func2(Base* obj) {
 	printf("func2(Base* obj)\n");
 	obj->x = 4;
-	obj->a = 7.8;
+	obj->a = (float)7.8;
 }
 
 void func3(Base& obj) {
 	printf("func3(Base& obj)\n");
 	obj.x = 4;
-	obj.a = 7.8;
+	obj.a = (float)7.8;
 }
 
 
-Base func1() {
+Base ret1() {
+	printf("Base ret1()\n");
 	Base b;
 	b.x = 6; 
 	b.a = 3.4;
 	return b;
 }
 
-Base* func2() {
+Base ret1_() {
+	printf("Base ret1_()\n");
+	Base* b = new Base;
+	b->x = 6;
+	b->a = 3.4;
+	return *b;
+}
+
+Base* ret2() {
+	printf("Base* ret2()\n");
 	Base b;
 	b.x = 6;
 	b.a = 3.4;
 	return &b;
 }
 
-Base& func3() {
+Base* ret2_() {
+	printf("Base* ret2_()\n");
+	Base* b = new Base;
+	b->x = 6;
+	b->a = 3.4;
+	return b;
+}
+
+Base& ret3() {
+	printf("Base& ret3()\n");
 	Base b;
 	b.x = 6;
 	b.a = 3.4;
 	return b;
 }
+
+Base& ret3_() {
+	printf("Base& ret3_()\n");
+	Base* b = new Base;
+	b->x = 6;
+	b->a = 3.4;
+	return *b;
+}
+
 
 void output_state(Base& obj) {
 	printf("x = %d, a = %.2f\n\n", obj.x, obj.a);
@@ -199,10 +233,92 @@ int main() {
 		delete d2;
 	}
 	printf("-----------------------------------------\n");
+
+	// проверка работы конструкторов
+	{
+		Base b0;
+		Base b1(b0);
+		Base b2(&b1);
+		Base b3 = b2; 
+
+		Desc d0;
+		Desc d1(d0);
+		Desc d2(&d1);
+		Desc d3 = d2;
+	}
+	printf("-----------------------------------------\n");
+	{
+		Base* b0 = new Base();
+		Base* b1 = new Base(b0);
+		Base* b2 = new Base(*b1);
+		Base* b3 = b2;
+		Base* b4;
+
+		delete b0;
+		delete b1;
+		delete b2;
+		//delete b3;
+		//delete b4;
+
+
+		Desc* d0 = new Desc();
+		Desc* d1 = new Desc(d0);
+		Desc* d2 = new Desc(*d1);
+		Desc* d3 = d2;
+		Desc* d4;
+
+		delete d0;
+		delete d1;
+		delete d2;
+		//delete d3;
+		//delete b4;
+
+	}
+	printf("-----------------------------------------\n");
 	// проверка механизма возврата объектов из функции
 	{
-		Base b1 = &(func1());
-		Base* b2 = &(func1());
+		Base b1;
+		b1 = ret1();
+		printf("b1_ :: x = %d, a = %.2f\n\n", b1.x, b1.a);
+		printf("\n");
+
+		Base b1_;
+		b1_ = ret1_();
+		printf("b1_ :: x = %d, a = %.2f\n\n", b1_.x, b1_.a);
+		printf("\n");
+
+		/*Base* b2;
+		b2 = ret2();
+		delete b2;
+		printf("\n");*/
+
+		Base* b2_;
+		b2_ = ret2_();
+		printf("b2 :: x = %d, a = %.2f\n\n", b2_->x, b2_->a);
+		delete b2_;
+		printf("\n");
+
+		Base b3;
+		b3 = ret3();
+		printf("b3 :: x = %d, a = %.2f\n\n", b3.x, b3.a);
+		printf("\n");
+
+		Base b3_;
+		b3_ = ret3_();
+		printf("b3_ :: x = %d, a = %.2f\n\n", b3_.x, b3_.a);
+		printf("\n");
+
+		/*Base* b3_2;
+		b3_2 = &(ret3());
+		printf("b3_2 :: x = %d, a = %.2f\n\n", b3_2->x, b3_2->a);
+		delete b3_2;
+		printf("\n");*/
+
+		Base* b3_2_;
+		b3_2_ = &(ret3_());
+		printf("b3__ :: x = %d, a = %.2f\n\n", b3_2_->x, b3_2_->a);
+		delete b3_2_;
+		printf("\n");
 	}
 	
 	return 0;
