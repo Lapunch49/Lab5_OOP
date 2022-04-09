@@ -10,14 +10,14 @@ private:
 	string name;
 public:
 	Animal() {
-		printf("\nAnimal\n");
+		printf("\nAnimal()\n");
 	}
 	Animal(string name) {
 		this->name = name;
 		printf("\nAnimal(string name)\n");
 	}
 	virtual ~Animal() {
-		printf("~Animal\n");
+		printf("~Animal()\n");
 	}
 	virtual void sound() {
 		printf("\n");
@@ -228,4 +228,55 @@ int main() {
 		}
 	}
 
+	printf("\n\n-----using smart pointers-----\n");
+
+	// unique_ptr
+
+	unique_ptr<Dog> unq = unique_ptr<Dog>(new Dog());
+	unq->sound();
+
+	Dog* d1 = new Dog("Rex");
+	auto unq1 = unique_ptr<Dog>(d1);
+	(*unq1).classname();
+	// освобождаем unq1
+	Dog* d2 = unq1.release(); //
+	delete d2;
+
+	Dog* d3 = new Dog("Bob");
+	auto unq2 = unique_ptr<Dog>(d3);
+	unq1 = std::move(unq2); // освободили unq2 - теперь он пуст, а unq1 указывает на объект "Bob"
+
+	unique_ptr<Dog> unq3;
+	unq3 = std::move(unq1); // освободили unq1 - теперь он пуст, а unq3 указывает на объект "Bob"
+
+	Dog* ptr = unq3.get(); // продолжает указывать на объект, поэтому не можем удалить ptr
+	ptr->whine();
+	//delete ptr;
+
+	unique_ptr<Dog> unq4 = std::make_unique<Dog>("Mars");
+	//unq4.reset();
+
+	auto& ref = unq4; // создали ссылку на умн. указатель
+	ref->sound();
+
+	ref.reset(); 
+	printf("\n");
+
+	// shared_ptr
+
+	shared_ptr<Cat> shr1 = shared_ptr<Cat>(new Cat("Rose"));
+	auto shr2 = make_shared<Cat>("Milka");
+	shr1.swap(shr2); // теперь shr1 указывает на "Milka", а shr2 - на "Rose"
+
+	auto shr3 = shr2;
+	int n = shr3.use_count();
+	printf("%d\n", n);
+
+	shr3.reset(); // теперь shr3 не указывает на "Rose", но этот объект не удаляется, т.к. на него еще указывает shr2
+	n = shr2.use_count();
+	printf("%d\n", n);
+
+	shr2.reset(); // теперь и shr2 не указывает на "Rose", поэтому вызовется деструктор для "Rose"
+	n = shr2.use_count();
+	printf("%d\n", n);
 }

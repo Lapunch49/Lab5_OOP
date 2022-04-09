@@ -37,6 +37,20 @@ public:
 		x = 0;
 		a = 0;
 	}
+	void method1() {
+		printf("Base::method1()\n");
+		method2();
+	}
+	void method2() {
+		printf("Base::method2()\n\n");
+	}
+	void method3() {
+		printf("Base::method3()\n");
+		method4();
+	}
+	virtual void method4() {
+		printf("Base::method4()\n\n");
+	}
 };
 
 class Desc : public Base {
@@ -67,6 +81,12 @@ public:
 		y = 0; 
 		b = 0;
 		printf("x = %d,a = %.2f, y = %d, b = %.2f\n", x, a, y, b);
+	}
+	void method2() {
+		printf("Desc::method2()\n\n");
+	}
+	void method4() {
+		printf("Desc::method4()\n\n");
 	}
 };
 
@@ -149,7 +169,49 @@ Base back_state(Base& obj) {
 }
 
 int main() {
-	// ипользование функций, принимающих разные Base, с параметром Base
+	// проверка работы конструкторов
+	{
+		Base b0;
+		Base b1(b0);
+		Base b2(&b1);
+		Base b3 = b2; 
+
+		Desc d0;
+		Desc d1(d0);
+		Desc d2(&d1);
+		Desc d3 = d2;
+	}
+	printf("============================================\n");
+	{
+		Base* b0 = new Base();
+		Base* b1 = new Base(b0);
+		Base* b2 = new Base(*b1);
+		Base* b3 = b2;
+		Base* b4;
+
+		delete b0;
+		delete b1;
+		delete b2;
+		//delete b3;
+		//delete b4;
+
+
+		Desc* d0 = new Desc();
+		Desc* d1 = new Desc(d0);
+		Desc* d2 = new Desc(*d1);
+		Desc* d3 = d2;
+		Desc* d4;
+
+		delete d0;
+		delete d1;
+		delete d2;
+		//delete d3;
+		//delete b4;
+
+	}
+	printf("-----------------------------------------\n");
+
+	// использование функций, принимающих разные Base, с параметром Base
 	{
 		Base b1;
 		printf("\n");
@@ -190,6 +252,7 @@ int main() {
 		delete b2;
 	}
 	printf("-----------------------------------------\n");
+
 	//использование функций, принимающих разные Base, с параметром Desc
 	{
 		Desc d1;
@@ -232,48 +295,7 @@ int main() {
 
 		delete d2;
 	}
-	printf("-----------------------------------------\n");
-
-	// проверка работы конструкторов
-	{
-		Base b0;
-		Base b1(b0);
-		Base b2(&b1);
-		Base b3 = b2; 
-
-		Desc d0;
-		Desc d1(d0);
-		Desc d2(&d1);
-		Desc d3 = d2;
-	}
-	printf("-----------------------------------------\n");
-	{
-		Base* b0 = new Base();
-		Base* b1 = new Base(b0);
-		Base* b2 = new Base(*b1);
-		Base* b3 = b2;
-		Base* b4;
-
-		delete b0;
-		delete b1;
-		delete b2;
-		//delete b3;
-		//delete b4;
-
-
-		Desc* d0 = new Desc();
-		Desc* d1 = new Desc(d0);
-		Desc* d2 = new Desc(*d1);
-		Desc* d3 = d2;
-		Desc* d4;
-
-		delete d0;
-		delete d1;
-		delete d2;
-		//delete d3;
-		//delete b4;
-
-	}
+	
 	printf("-----------------------------------------\n");
 	// проверка механизма возврата объектов из функции
 	{
@@ -320,6 +342,58 @@ int main() {
 		delete b3_2_;
 		printf("\n");
 	}
-	
+
+	printf("-----------------------------------------\n");
+	// проверка работы виртуальных, невиртуальных, переопределенных, перекрытых методов 
+	{ // метод2 - невиртуальный
+		{	
+			Base b;
+			b.method1();
+			b.method2();
+
+			Desc d;
+			d.method1();
+			d.method2();
+
+			Base* b1 = new Base();
+			b1->method1();
+			b1->method2();
+
+			Desc* d1 = new Desc();
+			d1->method1();
+			d1->method2();
+
+			Base* d1_ = new Desc();
+			d1_->method1();
+			d1_->method2();
+
+			delete b1, d1, d1_;
+		}
+		printf("============================================\n");
+		// метод4 - виртуальный
+		{
+			Base b;
+			b.method3();
+			b.method4();
+
+			Desc d;
+			d.method3();
+			d.method4();
+
+			Base* b1 = new Base();
+			b1->method3();
+			b1->method4();
+
+			Desc* d1 = new Desc();
+			d1->method3();
+			d1->method4();
+
+			Base* d1_ = new Desc();
+			d1_->method3();
+			d1_->method4(); 
+
+			delete b1, d1, d1_;
+		}
+	}
 	return 0;
 }
